@@ -7,7 +7,7 @@ import CannonPipe from './CannonPipe';
 import CannonBall from './CannonBall';
 import CurrentScore from './CurrentScore';
 import FlyingObject from './FlyingObject';
-//import Heart from './Heart';
+import Heart from './Heart';
 //import StartGame from './StartGame';
 import Title from './Title';
 import StartGame from "./StartGame";
@@ -15,12 +15,23 @@ import StartGame from "./StartGame";
 const Canvas = (props) => {
     const gameHeight = 1200;
     const viewBox = [window.innerWidth / -2, 100 - gameHeight, window.innerWidth, gameHeight];
+    const lives = [];
+
+    for (let i = 0; i < props.gameState.lives; i++) {
+        const heartPosition = {
+            x: -180 - (i * 70),
+            y: 35
+        };
+        lives.push(<Heart key={i} position={heartPosition} />);
+    }
+
     return (
         <svg
             id="aliens-go-home-canvas"
             preserveAspectRatio="xMaxYMax none"
             onMouseMove={props.trackMouse}
             viewBox={viewBox}
+            onClick={props.shoot}
         >
             <defs>
                 <filter id="shadow">
@@ -29,10 +40,16 @@ const Canvas = (props) => {
             </defs>
             <Sky />
             <Ground />
+
+            {props.gameState.cannonBalls.map(cannonBall => (
+                <CannonBall
+                    key={cannonBall.id}
+                    position={cannonBall.position}/>
+            ))}
+
             <CannonPipe rotation={props.angle} />
             <CannonBase />
-            <CannonBall position={{x: 0, y: -100}}/>
-            <CurrentScore score={15} />
+            <CurrentScore score={props.gameState.kills} />
 
             { ! props.gameState.started &&
                 <g>
@@ -47,6 +64,7 @@ const Canvas = (props) => {
                     position={flyingObject.position}
                 />
             ))}
+            {lives}
         </svg>
     );
 };
@@ -67,6 +85,7 @@ Canvas.propTypes = {
     }).isRequired,
     trackMouse: PropTypes.func.isRequired,
     startGame: PropTypes.func.isRequired,
+    shoot: PropTypes.func.isRequired,
 };
 
 export default Canvas;
